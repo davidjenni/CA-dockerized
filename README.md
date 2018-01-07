@@ -11,23 +11,23 @@ The CA file artifacts (its database, public certs and private keys) are stored i
 - clientCert:   create a new client certificate, signed by sub-CA
 
 ## File and Volume Layout
-/certs/public           public certificates of root and sub CAs
-/certs/db/              certificate database, CRL and CA production files
-/certs/root-secrets     private keys for root CA
-/certs/sub-secrets      private keys for sub CA
+- /ca-app/certs         public certificates of root and sub CAs
+- /ca-app/db/           certificate database, CRL and CA production files
+- /secrets/rootCA       private keys for root CA
+- /secrets/subCA        private keys for sub CAs
 
 ## Container
 build:
 ```
-docker build . -t ca-dockerized
+docker build ca-app -t ca-dockerized
 ```
 
 run interactively:
 ```
-docker run --rm -it -v d:\Prj\ca-dockerized\locCerts:/certs ca-dockerized ash
+docker run --rm -it -v d:\Prj\ca-dockerized\loc\certs:/ca-app/certs -v ca-db:/ca-app/db ca-dockerized ash
 ```
 
 ## References:
-[Bulletproof SSL and TLS](https://www.feistyduck.com/books/bulletproof-ssl-and-tls/)
-[ivanr/bulletproof-tls](https://github.com/ivanr/bulletproof-tls/tree/master/private-ca)
+- [Bulletproof SSL and TLS](https://www.feistyduck.com/books/bulletproof-ssl-and-tls/)
+- [ivanr/bulletproof-tls](https://github.com/ivanr/bulletproof-tls/tree/master/private-ca)
 
