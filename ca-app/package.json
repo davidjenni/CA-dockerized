@@ -4,7 +4,9 @@
   "description": "Private CA nodejs app over openssl",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/mocha/bin/mocha ",
+    "lint": "node node_modules/eslint/bin/eslint.js .",
+    "lintfix": "node node_modules/eslint/bin/eslint.js --fix ."
   },
   "repository": {
     "type": "git",
@@ -18,5 +20,11 @@
   "homepage": "https://github.com/davidjenni/CA-dockerized#readme",
   "dependencies": {
     "yargs": "^10.0.3"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^4.15.0",
+    "mocha": "^4.1.0"
   }
 }
