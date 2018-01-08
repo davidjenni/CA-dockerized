@@ -1,0 +1,22 @@
+{
+  "name": "ca-dockerized",
+  "version": "0.1.0",
+  "description": "Private CA nodejs app over openssl",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidjenni/CA-dockerized.git"
+  },
+  "author": "David Jenni (david.jenni@outlook.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidjenni/CA-dockerized/issues"
+  },
+  "homepage": "https://github.com/davidjenni/CA-dockerized#readme",
+  "dependencies": {
+    "yargs": "^10.0.3"
+  }
+}
