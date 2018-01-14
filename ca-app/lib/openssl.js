@@ -3,14 +3,18 @@
 const util = require('util');
 const execFile = util.promisify(require('child_process').execFile);
 
+const opensslExe = 'openssl';
+
 module.exports = class OpenSsl {
-    constructor(config) {
-        this._config = config;
+    constructor(configFile) {
+        if (configFile) {
+            this._configFile = configFile;
+        }
     }
 
-    exec(verb, options) {
+    async exec(verb, options) {
         let args = [];
         Object.keys(options).forEach((key) => args.push(`-${key}`, options[key]));
-        return execFile('openssl', [ verb ].concat(args));
+        return execFile(opensslExe, [ verb ].concat(args));
     }
 }

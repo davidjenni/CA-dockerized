@@ -1,7 +1,10 @@
 extends: eslint:recommended
+parser: esprima
 parserOptions:
   ecmaVersion: 2015
   sourceType: module
+  ecmaFeatures:
+    impliedStrict: true
 env:
   node: true
   mocha: true
@@ -10,3 +13,5 @@ rules:
   indent: [ error, 4 ]
   keyword-spacing: error
   no-var: error
+globals:
+  expect: true
