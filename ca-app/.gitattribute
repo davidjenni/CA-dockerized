@@ -1,0 +1,6 @@
+# can't depend that every git install has core.autocrlf set:
+* text=auto
+
+# npm install insists on package.json to have unix file endings
+/package.json       text eol=lf
+/package-lock.json  text eol=lf
