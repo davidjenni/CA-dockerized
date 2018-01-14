@@ -5,7 +5,7 @@ const OpenSsl = require('../lib/openssl');
 
 describe('openssl', () => {
     beforeEach(() => {
-        this.openssl = new OpenSsl('ff');
+        this.openssl = new OpenSsl();
     });
 
     it('rand verb returns stdout', async () => {
