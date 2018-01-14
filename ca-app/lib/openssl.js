@@ -1,7 +1,7 @@
 'use strict';
 
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const execFile = util.promisify(require('child_process').execFile);
 
 module.exports = class OpenSsl {
     constructor(config) {
@@ -11,6 +11,6 @@ module.exports = class OpenSsl {
     exec(verb, options) {
         let args = [];
         Object.keys(options).forEach((key) => args.push(`-${key}`, options[key]));
-        return exec(['openssl', verb].concat(args).join(' '));
+        return execFile('openssl', [ verb ].concat(args));
     }
 }
