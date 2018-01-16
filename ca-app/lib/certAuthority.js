@@ -4,8 +4,6 @@ const fs = require('fs-extra');
 const path = require('path');
 const OpenSsl = require('./openssl');
 
-/*eslint no-console: ["error", { allow: ["dir", "error"] }] */
-
 module.exports = class CertAuthority {
     /**
      * New certificate authority
@@ -26,13 +24,19 @@ module.exports = class CertAuthority {
         this._openSsl = new OpenSsl();
     }
 
-    async initRootCA() {
+    /**
+     * Initialize Root CA: create database, generate and sign root CA certificate
+     * @param {string} keyPassword - password to encrypt root CA private key file
+     * @returns {Promise} - returns an object with CA cert filename and validity
+     */
+    async initRootCA(keyPassword) {
         await this._createAuthFiles();
-        await this._createRootKey('foo');
-        await this._signRootCert('foo');
+        await this._createRootKey(keyPassword);
+        return await this._signRootCert(keyPassword);
     }
 
     async _createAuthFiles() {
+        // creating CA files is idempotent; although each call will generate a new serial
         fs.ensureDirSync(this._dbDir);
         fs.ensureDirSync(this._certsDir);
         fs.ensureDirSync(this._secretsDir);
@@ -50,12 +54,8 @@ module.exports = class CertAuthority {
                 config: this._configFiles.rootCA,
                 out: 'root-ca.csr',
                 passout: `pass:${keyPassword}`
-            }], this._configFileParams)
-            .catch((err) => {
-                console.error(`createRootKey: openssl error: ${err.message}`);
-                throw err;
-            });
-        console.error(result.stderr);
+            }], this._configFileParams);
+        return result.stderr;
     }
 
     async _signRootCert(keyPassword) {
@@ -66,11 +66,25 @@ module.exports = class CertAuthority {
                 out: 'root-ca.crt',
                 extensions: 'ca_ext',
                 passin: `pass:${keyPassword}`,
-            }], this._configFileParams)
-            .catch((err) => {
-                console.error(`signRootCert: openssl error: ${err.message}`);
-                throw err;
-            });
-        console.error(result.stderr);
+            }], this._configFileParams);
+        let lines = result.stderr.split(/\n|\r\n/);
+        let rootCertInfo = {}
+        for (let lineNr = 0; lineNr < lines.length; lineNr++) {
+            let line = lines[lineNr];
+            if (!rootCertInfo.certFile && line.match(/Serial Number:/)) {
+                let serNumber = lines[lineNr + 1];
+                rootCertInfo.certificateFile = path.join(this._certsDir, serNumber.trim().split(':').join('').toUpperCase() + '.pem');
+            } else if (!rootCertInfo.notBefore && line.match(/Validity/)) {
+                rootCertInfo.notBefore = extractDate(lines[lineNr + 1]);
+                rootCertInfo.notAfter = extractDate(lines[lineNr + 2]);
+                break;
+            }
+        }
+        return rootCertInfo;
     }
+}
+
+function extractDate(detailLine) {
+    let [ , dateString ] = detailLine.split(/\w+\s*:\s+/, 2);
+    return new Date(dateString);
 }

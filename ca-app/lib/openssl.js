@@ -15,6 +15,7 @@ module.exports = class OpenSsl {
      * @param {string} verb - e.g. rand, ca, req, @see {@link https://www.openssl.org/docs/manmaster/man1/|OpenSSL commands}
      * @param {(string|object)[]} options - array of options for verb; any object will get converted as tuple, e.g. { hex: 16 } => [ '-hex], '16' ]
      * @param {object} [parameters] - optional: map or parameters to CA config file
+     * @returns {Promise} - returns a object with 'stdout' and 'stderr' properties, @see {@link https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback}
      */
     async exec(verb, options, parameters) {
         if (!verb) throw new Error('Must have first argument: verb');
