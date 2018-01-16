@@ -66,6 +66,19 @@ describe('certAuthority', () => {
         issuer.stdout.should.match(/\/C=CH\/O=another-org\/CN=Root CA/);
     });
 
+    it('add subCA, default parameters', async () => {
+        let certAuth = new CertAuthority(this._dirname, this._secretsDir, this._configFiles.rootCA, this._configFiles.subCA);
+        let info = await certAuth.initRootCA('foo');
+        expect(info).to.exist;
+
+        let subInfo = await certAuth.addSubCA('foo', 'bar');
+        expect(subInfo).to.exist;
+        expect(subInfo).to.have.property('certificateFile');
+        assert(fs.existsSync(subInfo.certificateFile));
+        let certFile = fs.readFileSync(subInfo.certificateFile, 'utf8');
+        certFile.should.match(/-----BEGIN CERTIFICATE-----/);
+    });
+
     afterEach(() => {
         this._tmpDir.removeCallback();
     });

@@ -44,6 +44,17 @@ module.exports = class CertAuthority {
         return await this._signRootCert(keyPassword);
     }
 
+    /**
+     * Add a sub CA to root CA: creates and signs an intermediate CA cert
+     * @param {*} rootKeyPassword - password to decrypt root CA private key
+     * @param {*} subKeyPassword - password to encrypt subCA private key
+     * @returns {Promise} - returns an object with CA cert filename and validity
+     */
+    async addSubCA(rootKeyPassword, subKeyPassword) {
+        await this._createSubKey(subKeyPassword);
+        return await this._signSubCert(rootKeyPassword);
+    }
+
     async _createAuthFiles() {
         // creating CA files is idempotent; although each call will generate a new serial
         fs.ensureDirSync(this._dbDir);
@@ -70,15 +81,42 @@ module.exports = class CertAuthority {
 
     async _signRootCert(keyPassword) {
         const result = await this._openSsl.exec('ca', [
-            'selfsign', 'batch', {
+            'selfsign', 'batch', 'notext', {
                 config: this._configFileRootCA,
                 in: 'root-ca.csr',
-                out: 'root-ca.crt',
+                out: '../certs/root-ca.pem',
                 extensions: 'ca_ext',
                 passin: `pass:${keyPassword}`,
             }], this._configFileParams);
 
-        let lines = result.stderr.split(/\n|\r\n/);
+        return this._extractCertInfo(result.stderr);
+    }
+
+    async _createSubKey(subKeyPassword) {
+        const result = await this._openSsl.exec('req', [
+            'new', 'batch', {
+                config: this._configFileSubCA,
+                out: 'sub-ca.csr',
+                passout: `pass:${subKeyPassword}`
+            }], this._configFileParams);
+        return result.stderr;
+    }
+
+    async _signSubCert(rootKeyPassword) {
+        const result = await this._openSsl.exec('ca', [
+            'batch', 'notext', {
+                config: this._configFileRootCA,
+                in: 'sub-ca.csr',
+                out: '../certs/sub-ca.pem',
+                extensions: 'sub_ca_ext',
+                passin: `pass:${rootKeyPassword}`,
+            }], this._configFileParams);
+
+        return this._extractCertInfo(result.stderr);
+    }
+
+    _extractCertInfo(caOutput) {
+        let lines = caOutput.split(/\n|\r\n/);
         let rootCertInfo = {}
         for (let lineNr = 0; lineNr < lines.length; lineNr++) {
             let line = lines[lineNr];
