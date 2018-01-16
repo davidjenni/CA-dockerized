@@ -7,7 +7,10 @@ const execFile = util.promisify(require('child_process').execFile);
 const opensslExe = 'openssl';
 
 module.exports = class OpenSsl {
-    constructor() {
+    constructor(workingDir = '.') {
+        if (workingDir !== '.') {
+            this._workingDir = workingDir;
+        }
     }
 
     /**
@@ -31,7 +34,11 @@ module.exports = class OpenSsl {
             }
         });
         let env = _.extend(_.cloneDeep(process.env), parameters);
-        return execFile(opensslExe, [ verb ].concat(args), { env: env });
+        let execOptions = { env: env };
+        if (this._workingDir) {
+            execOptions.cwd = this._workingDir;
+        }
+        return execFile(opensslExe, [ verb ].concat(args), execOptions);
     }
 }
 

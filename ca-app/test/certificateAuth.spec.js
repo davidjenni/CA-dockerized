@@ -14,7 +14,7 @@ describe('certAuthority', () => {
         this._dbDir = path.join(dirname, 'db');
         this._certsDir = path.join(dirname, 'certs');
         this._secretsDir = path.join(dirname, 'secrets');
-        this._auth = new CertAuth(dirname, this._secretsDir, { rootCA: './config/root-ca.conf' });
+        this._auth = new CertAuth(dirname, this._secretsDir, { rootCA: './config/root-ca.conf', subCA: './config/sub-ca.conf' });
     });
 
     it('initialize root CA', async () => {

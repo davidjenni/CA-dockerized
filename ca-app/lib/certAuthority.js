@@ -14,14 +14,17 @@ module.exports = class CertAuthority {
     constructor(caBaseDir, secretsDir, configFiles) {
         this._dbDir = path.join(caBaseDir, 'db');
         this._certsDir = path.join(caBaseDir, 'certs');
+        this._reqsDir = path.join(caBaseDir, 'requests');
         this._secretsDir = secretsDir;
         this._configFiles = configFiles || { rootCA: 'config/root-ca.conf', subCA: 'config/sub-ca.conf' };
+        this._configFiles.rootCA = path.resolve(this._configFiles.rootCA);
+        this._configFiles.subCA = path.resolve(this._configFiles.subCA);
         this._configFileParams = {
             home_dir: caBaseDir,
             secrets_dir: secretsDir
         };
 
-        this._openSsl = new OpenSsl();
+        this._openSsl = new OpenSsl(this._reqsDir);
     }
 
     /**
@@ -39,6 +42,7 @@ module.exports = class CertAuthority {
         // creating CA files is idempotent; although each call will generate a new serial
         fs.ensureDirSync(this._dbDir);
         fs.ensureDirSync(this._certsDir);
+        fs.ensureDirSync(this._reqsDir);
         fs.ensureDirSync(this._secretsDir);
 
         let dbFile = path.join(this._dbDir, 'index');
@@ -61,12 +65,13 @@ module.exports = class CertAuthority {
     async _signRootCert(keyPassword) {
         const result = await this._openSsl.exec('ca', [
             'selfsign', 'batch', {
-                config: 'config/root-ca.conf',
+                config: this._configFiles.rootCA,
                 in: 'root-ca.csr',
                 out: 'root-ca.crt',
                 extensions: 'ca_ext',
                 passin: `pass:${keyPassword}`,
             }], this._configFileParams);
+
         let lines = result.stderr.split(/\n|\r\n/);
         let rootCertInfo = {}
         for (let lineNr = 0; lineNr < lines.length; lineNr++) {
