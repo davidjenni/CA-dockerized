@@ -17,7 +17,7 @@ module.exports = class CertAuthority {
         this._dbDir = path.join(caBaseDir, 'db');
         this._certsDir = path.join(caBaseDir, 'certs');
         this._secretsDir = secretsDir;
-        this._configFiles = configFiles;
+        this._configFiles = configFiles || { rootCA: 'config/root-ca.conf', subCA: 'config/sub-ca.conf' };
         this._configFileParams = {
             home_dir: caBaseDir,
             secrets_dir: secretsDir
@@ -45,33 +45,32 @@ module.exports = class CertAuthority {
     }
 
     async _createRootKey(keyPassword) {
-        const result = await this._openSsl.exec('req', {
-            new: '$binary',
-            config: 'config/root-ca.conf',
-            out: 'root-ca.csr',
-            passout: `pass:${keyPassword}`
-        }, this._configFileParams)
+        const result = await this._openSsl.exec('req', [
+            'new', 'batch', {
+                config: this._configFiles.rootCA,
+                out: 'root-ca.csr',
+                passout: `pass:${keyPassword}`
+            }], this._configFileParams)
             .catch((err) => {
                 console.error(`createRootKey: openssl error: ${err.message}`);
                 throw err;
             });
-        console.dir(result);
+        console.error(result.stderr);
     }
 
     async _signRootCert(keyPassword) {
-        const result = await this._openSsl.exec('ca', {
-            selfsign: '$binary',
-            config: 'config/root-ca.conf',
-            in: 'root-ca.csr',
-            out: 'root-ca.crt',
-            extensions: 'ca_ext',
-            passin: `pass:${keyPassword}`,
-            batch: '$binary',
-        }, this._configFileParams)
+        const result = await this._openSsl.exec('ca', [
+            'selfsign', 'batch', {
+                config: 'config/root-ca.conf',
+                in: 'root-ca.csr',
+                out: 'root-ca.crt',
+                extensions: 'ca_ext',
+                passin: `pass:${keyPassword}`,
+            }], this._configFileParams)
             .catch((err) => {
                 console.error(`signRootCert: openssl error: ${err.message}`);
                 throw err;
             });
-        console.dir(result);
+        console.error(result.stderr);
     }
 }
