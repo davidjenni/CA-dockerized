@@ -2,5 +2,5 @@
 * text=auto
 
 # npm install insists on package.json to have unix file endings
-/package.json       text eol=lf
-/package-lock.json  text eol=lf
+/ca-app/package.json        text eol=lf
+/ca-app/package-lock.json   text eol=lf

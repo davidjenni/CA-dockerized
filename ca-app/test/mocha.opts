@@ -1,1 +1,2 @@
 --ui bdd
+--timeout 10000

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha ",
     "lint": "node node_modules/eslint/bin/eslint.js .",
-    "lintfix": "node node_modules/eslint/bin/eslint.js --fix ."
+    "lintfix": "node node_modules/eslint/bin/eslint.js --fix .",
+    "ci": "npm test && npm run lint"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,8 @@
   },
   "homepage": "https://github.com/davidjenni/CA-dockerized#readme",
   "dependencies": {
+    "fs-extra": "^5.0.0",
+    "lodash": "^4.17.4",
     "yargs": "^10.0.3"
   },
   "devDependencies": {

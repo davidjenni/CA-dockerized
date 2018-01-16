@@ -12,12 +12,13 @@ describe('certAuthority', () => {
         this._tmpDir = tmp.dirSync({ unsafeCleanup: true });
         let dirname = this._tmpDir.name;
         this._dbDir = path.join(dirname, 'db');
-        fs.mkdirSync(this._dbDir);
-        this._auth = new CertAuth(dirname, dirname, { rootCA: '../config/root-ca.conf' });
+        this._secretsDir = path.join(dirname, 'secrets');
+        this._auth = new CertAuth(dirname, this._secretsDir, { rootCA: '../config/root-ca.conf' });
     });
 
-    it('create root CA', async () => {
-        await this._auth.createRootCA();
+    it('initialize root CA', async () => {
+        await this._auth.initRootCA();
+        // CA files (db and serial) have been created:
         assert(fs.existsSync(path.join(this._dbDir, 'index')));
         let serialFile = path.join(this._dbDir, 'serial');
         assert(fs.existsSync(serialFile));

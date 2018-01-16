@@ -16,3 +16,4 @@ rules:
   no-var: error
 globals:
   expect: true
+  assert: true

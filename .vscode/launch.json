@@ -15,7 +15,8 @@
                 "${workspaceFolder}/ca-app/test",
             ],
             "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${workspaceFolder}/ca-app"
         }
     ]
 }
